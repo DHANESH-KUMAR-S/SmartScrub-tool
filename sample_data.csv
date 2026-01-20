@@ -1,0 +1,19 @@
+name,age,email,salary,department,join_date,active,phone,address
+John Doe,28,john.doe@email.com,75000,Engineering,2022-01-15,true,555-123-4567,123 Main St
+Jane Smith,32,,85000,Marketing,2021-06-20,true,(555) 234-5678,456 Oak Ave
+Bob Johnson,45,bob.johnson@email.com,,Sales,2020-03-10,true,5553456789,789 Pine Rd
+Alice Brown,29,alice.brown@email.com,72000,Engineering,2022-08-05,true,555-456-7890,321 Elm St
+Charlie Wilson,,charlie@email.com,68000,HR,2021-11-30,false,555.567.8901,654 Maple Dr
+Diana Davis,35,diana.davis@email.com,92000,Marketing,,true,555-678-9012,987 Cedar Ln
+Eve Miller,27,eve.miller@email.com,71000,Engineering,2023-02-14,true,,159 Birch Way
+Frank Garcia,41,,79000,Sales,2020-09-22,true,555-789-0123,753 Spruce St
+Grace Lee,33,grace.lee@email.com,88000,Marketing,2021-04-18,true,555-890-1234,
+Henry Taylor,38,henry.taylor@email.com,95000,,2019-12-01,true,555-901-2345,852 Willow Ave
+John Doe,28,john.doe@email.com,75000,Engineering,2022-01-15,true,555-123-4567,123 Main St
+Sarah Connor,45,sarah.connor@invalid,120000,Security,2020-01-01,true,555-111-2222,100 Future Blvd
+Mike Johnson,52,mike@company,95000,Engineering,2018-05-15,true,555 333 4444,200 Tech Park
+Lisa Wang,29,lisa.wang@email.com,78000,Design,2022-03-20,true,+1-555-555-6666,300 Creative Ave
+Tom Brown,35,TOM.BROWN@EMAIL.COM,82000,engineering,2021-07-10,TRUE,555.777.8888,400 Code St
+Anna Davis,31,  anna.davis@email.com  ,76000,Marketing,2021-12-05,true,555-999-0000,  500 Brand Blvd  
+David Kim,42,david.kim@email.com,105000,Management,2019-08-30,true,555-000-1111,600 Executive Dr
+Emma Wilson,26,emma.wilson@email.com,69000,HR,2023-01-15,true,555-222-3333,700 People St

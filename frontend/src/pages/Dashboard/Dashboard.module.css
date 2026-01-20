@@ -1,0 +1,477 @@
+/* Dashboard - Modern Workflow Design */
+.dashboard {
+  padding: var(--spacing-8);
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+}
+
+/* Header */
+.dashboardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-4);
+}
+
+.headerContent {
+  flex: 1;
+}
+
+.dashboardTitle {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-bold);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--spacing-2);
+}
+
+.dashboardDescription {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--spacing-4);
+}
+
+/* Current Project Card */
+.currentProjectCard {
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  backdrop-filter: blur(20px);
+}
+
+.projectHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-6);
+}
+
+.projectInfo {
+  flex: 1;
+}
+
+.projectTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-semibold);
+  color: var(--accent-blue);
+  margin-bottom: var(--spacing-2);
+}
+
+.projectDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.projectName {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+}
+
+.projectStats {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.projectProgress {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-2);
+  min-width: 200px;
+}
+
+.progressLabel {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: var(--font-medium);
+}
+
+.progressBar {
+  width: 200px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
+}
+
+/* Workflow Card */
+.workflowCard {
+  padding: var(--spacing-8);
+}
+
+.workflowTitle {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-6);
+  text-align: center;
+}
+
+.stepsContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+.stepWrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.stepCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-6);
+  background: rgba(255, 255, 255, 0.02);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-2xl);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  min-width: 180px;
+  min-height: 200px;
+  position: relative;
+  backdrop-filter: blur(10px);
+}
+
+.stepCard:hover:not(.disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--accent-blue);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.stepCard.active {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+}
+
+.stepCard.completed {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: var(--accent-green);
+}
+
+.stepCard.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.stepNumber {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface-bg);
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-bold);
+  color: var(--text-muted);
+  transition: all var(--transition-normal);
+}
+
+.stepCard.active .stepNumber {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: white;
+}
+
+.stepCard.completed .stepNumber {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: white;
+}
+
+.stepIcon {
+  font-size: 2rem;
+  margin: var(--spacing-2) 0;
+}
+
+.stepLabel {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0;
+  text-align: center;
+}
+
+.stepDescription {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin: 0;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.activeIndicator {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent-blue);
+  color: white;
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-medium);
+  white-space: nowrap;
+}
+
+.stepConnector {
+  width: 60px;
+  height: 3px;
+  background: var(--border-color);
+  margin: 0 var(--spacing-4);
+  position: relative;
+  transition: all var(--transition-normal);
+}
+
+.stepConnector.connectorActive {
+  background: var(--accent-green);
+}
+
+.stepConnector::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -6px;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid var(--border-color);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: all var(--transition-normal);
+}
+
+.stepConnector.connectorActive::before {
+  border-left-color: var(--accent-green);
+}
+
+/* Recent Datasets */
+.recentCard {
+  padding: var(--spacing-6);
+}
+
+.recentHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-6);
+}
+
+.recentTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.datasetsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.datasetItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  text-align: left;
+  width: 100%;
+}
+
+.datasetItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--accent-blue);
+  transform: translateY(-1px);
+}
+
+.datasetIcon {
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: var(--radius-lg);
+}
+
+.datasetInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.datasetName {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+}
+
+.datasetStats {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.datasetDate {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  min-width: 100px;
+  text-align: right;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-12);
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  opacity: 0.5;
+}
+
+.emptyState h4 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.emptyState p {
+  font-size: var(--font-size-base);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Loading */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-12);
+  color: var(--text-muted);
+  font-size: var(--font-size-lg);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .stepsContainer {
+    gap: var(--spacing-4);
+  }
+  
+  .stepCard {
+    min-width: 150px;
+    min-height: 180px;
+    padding: var(--spacing-4);
+  }
+  
+  .stepConnector {
+    width: 40px;
+    margin: 0 var(--spacing-2);
+  }
+}
+
+@media (max-width: 1024px) {
+  .dashboard {
+    padding: var(--spacing-6);
+  }
+  
+  .dashboardHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-4);
+  }
+  
+  .projectHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-4);
+  }
+  
+  .projectProgress {
+    align-items: flex-start;
+    min-width: auto;
+  }
+  
+  .progressBar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    padding: var(--spacing-4);
+    gap: var(--spacing-6);
+  }
+  
+  .stepsContainer {
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+  
+  .stepWrapper {
+    width: 100%;
+  }
+  
+  .stepCard {
+    width: 100%;
+    min-height: auto;
+    flex-direction: row;
+    text-align: left;
+    padding: var(--spacing-4);
+  }
+  
+  .stepIcon {
+    font-size: 1.5rem;
+    margin: 0;
+  }
+  
+  .stepConnector {
+    display: none;
+  }
+  
+  .activeIndicator {
+    position: static;
+    transform: none;
+    margin-left: auto;
+  }
+}

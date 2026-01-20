@@ -1,0 +1,62 @@
+/* App-specific styles */
+.App {
+  min-height: 100vh;
+  background: var(--primary-bg);
+  color: var(--text-primary);
+}
+
+/* Global app animations */
+@keyframes appFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.App > * {
+  animation: appFadeIn 0.5s ease-out;
+}
+
+/* Loading states */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--text-muted);
+}
+
+.loading::after {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-top: 2px solid var(--accent-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-left: var(--spacing-2);
+}
+
+/* Error states */
+.error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  color: var(--accent-red-light);
+  margin: var(--spacing-4) 0;
+}
+
+/* Success states */
+.success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  color: var(--accent-green-light);
+  margin: var(--spacing-4) 0;
+}
