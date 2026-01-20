@@ -15,8 +15,8 @@ const Header = ({ onOpenCanvas, hasDataset }) => {
   const steps = [
     { id: 1, label: 'Upload', path: '/upload', icon: '📁', description: 'Import your data' },
     { id: 2, label: 'Profile', path: '/profile', icon: '📊', description: 'Analyze data quality', requiresDataset: true },
-    { id: 3, label: 'Clean', path: '/clean', icon: '🛠️', description: 'Clean your data', requiresDataset: true },
-    { id: 4, label: 'AI Clean', path: '/ai-clean', icon: '🤖', description: 'AI suggestions', requiresDataset: true },
+    { id: 3, label: 'Clean', path: '/cleaning', icon: '🛠️', description: 'Clean your data', requiresDataset: true },
+    { id: 4, label: 'AI Clean', path: '/auto-clean', icon: '🤖', description: 'AI suggestions', requiresDataset: true },
     { id: 5, label: 'Export', path: '/export', icon: '💾', description: 'Download results', requiresDataset: true }
   ];
 
@@ -24,15 +24,15 @@ const Header = ({ onOpenCanvas, hasDataset }) => {
     const path = location.pathname;
     if (path === '/dashboard') return 0;
     if (path === '/upload') return 1;
-    if (path === '/profile') return 2;
-    if (path === '/clean') return 3;
-    if (path === '/ai-clean') return 4;
-    if (path === '/export') return 5;
+    if (path.includes('/profile')) return 2;
+    if (path.includes('/cleaning')) return 3;
+    if (path.includes('/auto-clean')) return 4;
+    if (path.includes('/export')) return 5;
     return 0;
   };
 
   const activeStep = getCurrentStep();
-  const workingDatasetId = datasetId || currentDataset;
+  const workingDatasetId = datasetId || currentDataset?.id;
 
   const handleStepClick = (step) => {
     if (step.requiresDataset && !workingDatasetId) {
@@ -41,7 +41,11 @@ const Header = ({ onOpenCanvas, hasDataset }) => {
       return;
     }
 
-    navigate(step.path);
+    if (workingDatasetId && step.requiresDataset) {
+      navigate(`${step.path}/${workingDatasetId}`);
+    } else {
+      navigate(step.path);
+    }
   };
 
   const showCanvasButton = workingDatasetId && activeStep >= 2;

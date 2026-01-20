@@ -47,10 +47,10 @@ const Dashboard = () => {
       navigate('/upload');
     } else if (currentDataset) {
       const paths = {
-        2: '/profile',
-        3: '/clean',
-        4: '/ai-clean',
-        5: '/export'
+        2: `/profile/${currentDataset.id}`,
+        3: `/cleaning/${currentDataset.id}`,
+        4: `/auto-clean/${currentDataset.id}`,
+        5: `/export/${currentDataset.id}`
       };
       navigate(paths[step.id]);
     } else {
@@ -60,8 +60,13 @@ const Dashboard = () => {
 
   const handleDatasetClick = (dataset) => {
     // Update workflow context with selected dataset
-    updateDataset(dataset.dataset_id);
-    navigate('/profile');
+    updateDataset({
+      id: dataset.dataset_id,
+      filename: dataset.filename,
+      rows: dataset.original_shape?.[0] || 0,
+      columns: dataset.original_shape?.[1] || 0
+    });
+    navigate(`/profile/${dataset.dataset_id}`);
   };
 
   return (

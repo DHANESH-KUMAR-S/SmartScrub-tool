@@ -1,193 +1,384 @@
 import React, { useState, useEffect } from 'react';
-import { useWorkflow } from '../../contexts/WorkflowContext';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { exportAPI } from '../../services/api';
+import Card from '../../components/UI/Card';
+import Button from '../../components/UI/Button';
+import { formatFileSize, formatNumber, formatDate } from '../../utils/formatters';
 import styles from './Export.module.css';
 
 const Export = () => {
-  const { currentDataset, completeStep } = useWorkflow();
+  const { datasetId } = useParams();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState(null);
+  
+  const [exportInfo, setExportInfo] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
-  const [exportFormat, setExportFormat] = useState('csv');
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  
+  // Export configuration
+  const [exportConfig, setExportConfig] = useState({
+    format: 'csv',
+    include_metadata: true
+  });
 
   useEffect(() => {
-    if (!currentDataset) {
-      navigate('/upload');
-      return;
+    if (datasetId) {
+      loadExportInfo();
     }
-    fetchProfile();
-  }, [currentDataset, navigate]);
+  }, [datasetId]);
 
-  const fetchProfile = async () => {
+  useEffect(() => {
+    if (exportConfig.format && exportInfo) {
+      loadPreview();
+    }
+  }, [exportConfig.format, exportInfo]);
+
+  const loadExportInfo = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/api/profile/${currentDataset}`);
-      const data = await response.json();
-      if (data.success) {
-        setProfile(data.profile);
-      }
-    } catch (error) {
-      console.error('Error fetching profile:', error);
+      setLoading(true);
+      const response = await exportAPI.getExportInfo(datasetId);
+      setExportInfo(response.export_info);
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleExport = async () => {
-    setExporting(true);
+  const loadPreview = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:8000/api/export/${currentDataset}?format=${exportFormat}`
-      );
+      const response = await exportAPI.getExportPreview(datasetId, exportConfig.format, 5);
+      setPreview(response.preview);
+    } catch (err) {
+      console.error('Failed to load preview:', err);
+    }
+  };
 
-      if (!response.ok) throw new Error('Export failed');
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `cleaned_${profile.filename.replace(/\.[^/.]+$/, '')}.${exportFormat}`;
-      document.body.appendChild(a);
-      a.click();
+  const handleExport = async () => {
+    try {
+      setExporting(true);
+      setError(null);
+      
+      const response = await exportAPI.exportDataset(datasetId, exportConfig);
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Get filename from response headers or use default
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = `cleaned_${exportInfo.filename}`;
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
       window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-      completeStep(5);
-      alert('Export successful!');
-    } catch (error) {
-      console.error('Error exporting:', error);
-      alert('Failed to export file');
+      
+      setSuccess(`Successfully exported ${filename}`);
+      
+    } catch (err) {
+      setError(err.message);
     } finally {
       setExporting(false);
     }
   };
 
+  const getFormatIcon = (format) => {
+    switch (format) {
+      case 'csv': return '📄';
+      case 'json': return '📋';
+      case 'excel': return '📊';
+      default: return '📁';
+    }
+  };
+
+  const getFormatDescription = (format) => {
+    switch (format) {
+      case 'csv': return 'Comma-separated values - Universal format for data analysis';
+      case 'json': return 'JavaScript Object Notation - Structured data format';
+      case 'excel': return 'Microsoft Excel format - Includes multiple sheets and metadata';
+      default: return 'Unknown format';
+    }
+  };
+
+  const getEstimatedSize = (format) => {
+    if (!exportInfo?.estimated_sizes) return 'Unknown';
+    return formatFileSize(exportInfo.estimated_sizes[format] || 0);
+  };
+
   if (loading) {
     return (
       <div className={styles.loading}>
-        <div className={styles.spinner}></div>
-        <p>Loading dataset information...</p>
+        <div className="loading-spinner"></div>
+        <span>Loading export information...</span>
       </div>
     );
   }
 
-  if (!profile) {
-    return <div className={styles.error}>Failed to load dataset</div>;
+  if (error && !exportInfo) {
+    return (
+      <div className={styles.error}>
+        <span className={styles.errorIcon}>⚠️</span>
+        <h3>Error Loading Export Info</h3>
+        <p>{error}</p>
+        <Button variant="primary" onClick={() => navigate('/upload')}>
+          Upload New Dataset
+        </Button>
+      </div>
+    );
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.headerContent}>
-          <h1>Export Cleaned Data</h1>
-          <p>Download your cleaned dataset in your preferred format</p>
+    <div className={styles.export}>
+      <div className={styles.exportHeader}>
+        <div className={styles.headerInfo}>
+          <h2>💾 Export Dataset</h2>
+          <p className={styles.datasetName}>{exportInfo?.filename}</p>
+          <p className={styles.datasetStats}>
+            {formatNumber(exportInfo?.current_rows)} rows • {exportInfo?.current_columns} columns
+          </p>
+        </div>
+        <div className={styles.headerActions}>
+          <Button 
+            variant="primary" 
+            onClick={handleExport}
+            loading={exporting}
+            disabled={exporting}
+            size="large"
+          >
+            📥 Download {exportConfig.format.toUpperCase()}
+          </Button>
         </div>
       </div>
 
-      <div className={styles.content}>
-        <div className={styles.summaryCard}>
-          <h2>Dataset Summary</h2>
-          <div className={styles.summaryGrid}>
-            <div className={styles.summaryItem}>
-              <span className={styles.summaryLabel}>Filename</span>
-              <span className={styles.summaryValue}>{profile.filename}</span>
+      {error && (
+        <div className={styles.errorMessage}>
+          <span className={styles.errorIcon}>⚠️</span>
+          <span>{error}</span>
+        </div>
+      )}
+
+      {success && (
+        <div className={styles.successMessage}>
+          <span className={styles.successIcon}>✅</span>
+          <span>{success}</span>
+        </div>
+      )}
+
+      <div className={styles.exportGrid}>
+        {/* Format Selection */}
+        <Card className={styles.formatCard}>
+          <div className={styles.cardHeader}>
+            <h3>📋 Export Format</h3>
+          </div>
+          
+          <div className={styles.formatOptions}>
+            {exportInfo?.available_formats?.map((format) => (
+              <div
+                key={format}
+                className={`${styles.formatOption} ${
+                  exportConfig.format === format ? styles.selected : ''
+                }`}
+                onClick={() => setExportConfig(prev => ({ ...prev, format }))}
+              >
+                <div className={styles.formatIcon}>
+                  {getFormatIcon(format)}
+                </div>
+                <div className={styles.formatContent}>
+                  <h4 className={styles.formatName}>
+                    {format.toUpperCase()}
+                  </h4>
+                  <p className={styles.formatDescription}>
+                    {getFormatDescription(format)}
+                  </p>
+                  <div className={styles.formatMeta}>
+                    <span className={styles.formatSize}>
+                      ~{getEstimatedSize(format)}
+                    </span>
+                  </div>
+                </div>
+                <div className={styles.formatSelector}>
+                  <input
+                    type="radio"
+                    name="format"
+                    value={format}
+                    checked={exportConfig.format === format}
+                    onChange={() => setExportConfig(prev => ({ ...prev, format }))}
+                    className={styles.radioInput}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Export Options */}
+        <Card className={styles.optionsCard}>
+          <div className={styles.cardHeader}>
+            <h3>⚙️ Export Options</h3>
+          </div>
+          
+          <div className={styles.optionsContent}>
+            <label className={styles.optionLabel}>
+              <input
+                type="checkbox"
+                checked={exportConfig.include_metadata}
+                onChange={(e) => setExportConfig(prev => ({
+                  ...prev,
+                  include_metadata: e.target.checked
+                }))}
+                className={styles.checkbox}
+              />
+              <div className={styles.optionContent}>
+                <span className={styles.optionTitle}>Include Metadata</span>
+                <span className={styles.optionDescription}>
+                  Add dataset information, column types, and export timestamp
+                </span>
+              </div>
+            </label>
+            
+            <div className={styles.optionInfo}>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>Export Date:</span>
+                <span className={styles.infoValue}>
+                  {formatDate(new Date().toISOString())}
+                </span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>Data Types:</span>
+                <span className={styles.infoValue}>
+                  {Object.keys(exportInfo?.data_types || {}).length} columns
+                </span>
+              </div>
             </div>
-            <div className={styles.summaryItem}>
-              <span className={styles.summaryLabel}>Total Rows</span>
-              <span className={styles.summaryValue}>{profile.total_rows.toLocaleString()}</span>
+          </div>
+        </Card>
+      </div>
+
+      {/* Data Quality Summary */}
+      <Card className={styles.qualityCard}>
+        <div className={styles.cardHeader}>
+          <h3>📊 Data Quality Summary</h3>
+        </div>
+        
+        <div className={styles.qualityGrid}>
+          <div className={styles.qualityItem}>
+            <div className={styles.qualityIcon}>✅</div>
+            <div className={styles.qualityContent}>
+              <span className={styles.qualityLabel}>Data Completeness</span>
+              <span className={styles.qualityValue}>
+                {exportInfo?.quality_summary?.data_completeness?.toFixed(1) || 0}%
+              </span>
             </div>
-            <div className={styles.summaryItem}>
-              <span className={styles.summaryLabel}>Total Columns</span>
-              <span className={styles.summaryValue}>{profile.total_columns}</span>
+          </div>
+          
+          <div className={styles.qualityItem}>
+            <div className={styles.qualityIcon}>❓</div>
+            <div className={styles.qualityContent}>
+              <span className={styles.qualityLabel}>Missing Values</span>
+              <span className={styles.qualityValue}>
+                {formatNumber(exportInfo?.quality_summary?.missing_values || 0)}
+              </span>
             </div>
-            <div className={styles.summaryItem}>
-              <span className={styles.summaryLabel}>Data Quality</span>
-              <span className={styles.summaryValue}>
-                {(100 - profile.overall_missing_percentage).toFixed(1)}%
+          </div>
+          
+          <div className={styles.qualityItem}>
+            <div className={styles.qualityIcon}>🔄</div>
+            <div className={styles.qualityContent}>
+              <span className={styles.qualityLabel}>Duplicate Rows</span>
+              <span className={styles.qualityValue}>
+                {formatNumber(exportInfo?.quality_summary?.duplicate_rows || 0)}
+              </span>
+            </div>
+          </div>
+          
+          <div className={styles.qualityItem}>
+            <div className={styles.qualityIcon}>📅</div>
+            <div className={styles.qualityContent}>
+              <span className={styles.qualityLabel}>Last Modified</span>
+              <span className={styles.qualityValue}>
+                {formatDate(exportInfo?.last_modified)}
               </span>
             </div>
           </div>
         </div>
+      </Card>
 
-        <div className={styles.exportCard}>
-          <h2>Export Options</h2>
-          <div className={styles.formatSelector}>
-            <label className={styles.formatOption}>
-              <input
-                type="radio"
-                name="format"
-                value="csv"
-                checked={exportFormat === 'csv'}
-                onChange={(e) => setExportFormat(e.target.value)}
-              />
-              <div className={styles.formatInfo}>
-                <span className={styles.formatName}>CSV</span>
-                <span className={styles.formatDesc}>Comma-separated values</span>
-              </div>
-            </label>
-            <label className={styles.formatOption}>
-              <input
-                type="radio"
-                name="format"
-                value="excel"
-                checked={exportFormat === 'excel'}
-                onChange={(e) => setExportFormat(e.target.value)}
-              />
-              <div className={styles.formatInfo}>
-                <span className={styles.formatName}>Excel</span>
-                <span className={styles.formatDesc}>Microsoft Excel format (.xlsx)</span>
-              </div>
-            </label>
-            <label className={styles.formatOption}>
-              <input
-                type="radio"
-                name="format"
-                value="json"
-                checked={exportFormat === 'json'}
-                onChange={(e) => setExportFormat(e.target.value)}
-              />
-              <div className={styles.formatInfo}>
-                <span className={styles.formatName}>JSON</span>
-                <span className={styles.formatDesc}>JavaScript Object Notation</span>
-              </div>
-            </label>
+      {/* Data Preview */}
+      {preview && (
+        <Card className={styles.previewCard}>
+          <div className={styles.cardHeader}>
+            <h3>👁️ Export Preview</h3>
+            <div className={styles.cardStats}>
+              {exportConfig.format.toUpperCase()} format • {preview.rows_shown} of {formatNumber(preview.total_rows)} rows
+            </div>
           </div>
+          
+          <div className={styles.previewContainer}>
+            <pre className={styles.previewContent}>
+              {preview.content}
+            </pre>
+          </div>
+        </Card>
+      )}
 
-          <button
-            className={styles.exportButton}
-            onClick={handleExport}
-            disabled={exporting}
+      {/* Column Information */}
+      <Card className={styles.columnsCard}>
+        <div className={styles.cardHeader}>
+          <h3>📋 Column Information</h3>
+          <div className={styles.cardStats}>
+            {exportInfo?.current_columns} columns
+          </div>
+        </div>
+        
+        <div className={styles.columnsGrid}>
+          {exportInfo?.column_names?.map((columnName, index) => (
+            <div key={index} className={styles.columnItem}>
+              <div className={styles.columnHeader}>
+                <span className={styles.columnName}>{columnName}</span>
+                <span className={`${styles.columnType} ${styles[exportInfo.data_types[columnName]]}`}>
+                  {exportInfo.data_types[columnName]}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Navigation */}
+      <Card className={styles.navigationCard}>
+        <div className={styles.navigationContent}>
+          <Button 
+            variant="secondary" 
+            onClick={() => navigate(`/auto-clean/${datasetId}`)}
           >
-            {exporting ? 'Exporting...' : `Export as ${exportFormat.toUpperCase()}`}
-          </button>
+            ← AI Suggestions
+          </Button>
+          <Button 
+            variant="secondary" 
+            onClick={() => navigate(`/profile/${datasetId}`)}
+          >
+            Back to Profile
+          </Button>
+          <Button 
+            variant="primary" 
+            onClick={() => navigate('/')}
+          >
+            Dashboard →
+          </Button>
         </div>
-
-        <div className={styles.actionsCard}>
-          <h2>What's Next?</h2>
-          <div className={styles.actionsList}>
-            <button
-              className={styles.actionButton}
-              onClick={() => navigate('/upload')}
-            >
-              <span className={styles.actionIcon}>📁</span>
-              <div className={styles.actionInfo}>
-                <span className={styles.actionTitle}>Upload New Dataset</span>
-                <span className={styles.actionDesc}>Start a new cleaning workflow</span>
-              </div>
-            </button>
-            <button
-              className={styles.actionButton}
-              onClick={() => navigate('/dashboard')}
-            >
-              <span className={styles.actionIcon}>📊</span>
-              <div className={styles.actionInfo}>
-                <span className={styles.actionTitle}>View Dashboard</span>
-                <span className={styles.actionDesc}>See all your datasets</span>
-              </div>
-            </button>
-          </div>
-        </div>
-      </div>
+      </Card>
     </div>
   );
 };

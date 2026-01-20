@@ -87,7 +87,12 @@ const Upload = () => {
       setSuccess(`Successfully uploaded ${file.name}`);
       
       // Update workflow context
-      updateDataset(response.dataset_id);
+      updateDataset({
+        id: response.dataset_id,
+        filename: response.filename,
+        rows: response.rows,
+        columns: response.columns
+      });
       
       // Mark upload step as completed
       completeStep(1);
@@ -95,7 +100,7 @@ const Upload = () => {
 
       // Auto-navigate to profile after 2 seconds
       setTimeout(() => {
-        navigate('/profile');
+        navigate(`/profile/${response.dataset_id}`);
       }, 2000);
 
     } catch (err) {

@@ -1,42 +1,11 @@
-from dotenv import load_dotenv
-import os
-from contextlib import asynccontextmanager
-
-# Load environment variables FIRST before any other imports
-load_dotenv()
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import upload, profile, clean, export, auth
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Startup
-    print("\n" + "="*60)
-    print("SmartScrub API Starting...")
-    print("="*60)
-    
-    from app.core.storage import storage
-    if storage.use_gcs:
-        print(f"✓ Storage: Google Cloud Storage")
-        print(f"  Bucket: {storage.gcs_bucket_name}")
-        print(f"  Project: {storage.gcs_project_id}")
-    else:
-        print("⚠ Storage: In-Memory (data will be lost on restart)")
-        print("  Configure GCS for persistent storage")
-    
-    print("="*60 + "\n")
-    
-    yield
-    
-    # Shutdown (if needed)
-    pass
-
 app = FastAPI(
     title="SmartScrub API",
     description="Smart Data Cleaning Platform API",
-    version="1.0.0",
-    lifespan=lifespan
+    version="1.0.0"
 )
 
 # Configure CORS

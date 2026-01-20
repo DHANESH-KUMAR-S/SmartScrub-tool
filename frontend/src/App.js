@@ -8,8 +8,8 @@ import Landing from './pages/Landing/Landing';
 import Dashboard from './pages/Dashboard/Dashboard';
 import Upload from './pages/Upload/Upload';
 import Profile from './pages/Profile/Profile';
-import Clean from './pages/Clean/Clean';
-import AIClean from './pages/AIClean/AIClean';
+import Cleaning from './pages/Cleaning/Cleaning';
+import AutoClean from './pages/AutoClean/AutoClean';
 import Export from './pages/Export/Export';
 import './styles/App.css';
 
@@ -56,22 +56,22 @@ const AppContent = () => {
             <Upload />
           </Layout>
         } />
-        <Route path="/profile" element={
+        <Route path="/profile/:datasetId" element={
           <Layout onOpenCanvas={handleOpenCanvas}>
             <Profile onOpenCanvas={handleOpenCanvas} />
           </Layout>
         } />
-        <Route path="/clean" element={
+        <Route path="/cleaning/:datasetId" element={
           <Layout onOpenCanvas={handleOpenCanvas}>
-            <Clean />
+            <Cleaning />
           </Layout>
         } />
-        <Route path="/ai-clean" element={
+        <Route path="/auto-clean/:datasetId" element={
           <Layout onOpenCanvas={handleOpenCanvas}>
-            <AIClean />
+            <AutoClean />
           </Layout>
         } />
-        <Route path="/export" element={
+        <Route path="/export/:datasetId" element={
           <Layout onOpenCanvas={handleOpenCanvas}>
             <Export />
           </Layout>

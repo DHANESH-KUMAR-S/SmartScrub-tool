@@ -17,20 +17,6 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
-    // Add user ID if available
-    const user = localStorage.getItem('smartscrub_user');
-    if (user) {
-      try {
-        const userData = JSON.parse(user);
-        if (userData.id) {
-          config.headers['X-User-ID'] = userData.id;
-        }
-      } catch (e) {
-        console.error('Failed to parse user data:', e);
-      }
-    }
-    
     return config;
   },
   (error) => {
